@@ -28,7 +28,8 @@ public class HelloWorld {
         DeleteDbFiles.execute("~", "test", true);
 
         Class.forName("org.h2.Driver");
-        Connection conn = DriverManager.getConnection("jdbc:h2:~/test");
+//        Connection conn = DriverManager.getConnection("jdbc:h2:~/test");
+        Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
         Statement stat = conn.createStatement();
 
         // this line would initialize the database
@@ -36,7 +37,13 @@ public class HelloWorld {
         // stat.execute("runscript from 'init.sql'");
 
         stat.execute("create table test(id int primary key, name varchar(255))");
+        stat.execute("create table test_2(id int primary key, name varchar(255))");
         stat.execute("insert into test values(1, 'Hello')");
+        conn.commit();
+        stat.execute("create table test_3(id int primary key, name varchar(255))");
+        stat.execute("insert into test values(2, 'Hello')");
+        conn.commit();
+
         ResultSet rs;
         rs = stat.executeQuery("select * from test");
         while (rs.next()) {
