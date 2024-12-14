@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.h2.mvstore.type.DataType;
 import org.h2.mvstore.type.ObjectDataType;
 import org.h2.util.MemoryEstimator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A stored map.
@@ -33,6 +35,7 @@ import org.h2.util.MemoryEstimator;
  * @param <V> the value class
  */
 public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V> {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * The store.
@@ -105,6 +108,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
         this.avgKeySize = keyType.isMemoryEstimationAllowed() ? new AtomicLong() : null;
         this.avgValSize = valueType.isMemoryEstimationAllowed() ? new AtomicLong() : null;
 
+        log.info("Create MMap: id={}", this.id);
     }
 
     /**

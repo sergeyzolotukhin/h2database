@@ -43,11 +43,15 @@ import org.h2.util.DebuggingThreadLocal;
 import org.h2.util.Utils;
 import org.h2.value.DataType;
 import org.h2.value.TypeInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A table stored in a MVStore.
  */
 public class MVTable extends TableBase {
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+
     /**
      * The table name this thread is waiting to lock.
      */
@@ -154,6 +158,8 @@ public class MVTable extends TableBase {
         primaryIndex = new MVPrimaryIndex(database, this, getId(),
                 IndexColumn.wrap(getColumns()), IndexType.createScan(true));
         indexes.add(primaryIndex);
+
+        log.info("Create table: {}", data.tableName);
     }
 
     public String getMapName() {

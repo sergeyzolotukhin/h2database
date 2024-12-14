@@ -47,7 +47,7 @@
     <pgjdbc.version>42.7.2</pgjdbc.version>
     <javax.servlet.version>4.0.1</javax.servlet.version>
     <jakarta.servlet.version>5.0.0</jakarta.servlet.version>
-    <slf4j.version>2.0.7</slf4j.version>
+    <slf4j.version>2.0.16</slf4j.version>
     <nashorn.version>15.4</nashorn.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -117,11 +117,21 @@
 
 
     <!-- START TEST DEPENDENCIES !-->
-    <dependency>
+<!--    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-nop</artifactId>
       <version>${slf4j.version}</version>
       <scope>test</scope>
+    </dependency>-->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>1.5.12</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.5.12</version>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
@@ -221,6 +231,7 @@
           <include>org/h2/res/help.csv</include>
           <include>org/h2/res/javadoc.properties</include>
           <include>META-INF/**</include>
+          <include>logback.xml</include>
         </includes>
       </resource>
       <resource>

@@ -83,6 +83,8 @@ import org.h2.value.CompareMode;
 import org.h2.value.TypeInfo;
 import org.h2.value.ValueInteger;
 import org.h2.value.ValueTimestampTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * There is one database object per open database.
@@ -93,6 +95,7 @@ import org.h2.value.ValueTimestampTimeZone;
  * @since 2004-04-15 22:49
  */
 public final class Database implements DataHandler, CastDataProvider {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private static int initialPowerOffCount;
 
@@ -223,6 +226,7 @@ public final class Database implements DataHandler, CastDataProvider {
             META_LOCK_DEBUGGING_STACK.set(null);
         }
         String databaseName = ci.getName();
+        log.info("Create database: {}", databaseName);
         this.dbSettings = ci.getDbSettings();
         this.compareMode = CompareMode.getInstance(null, 0);
         this.persistent = ci.isPersistent();

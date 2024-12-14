@@ -33,6 +33,8 @@ import org.h2.compress.Compressor;
 import org.h2.mvstore.type.StringDataType;
 import org.h2.store.fs.FileUtils;
 import org.h2.util.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
 
@@ -124,6 +126,7 @@ MVStore:
  * A persistent storage for maps.
  */
 public final class MVStore implements AutoCloseable {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * Store is open.
@@ -249,6 +252,8 @@ public final class MVStore implements AutoCloseable {
      * @throws IllegalArgumentException if the directory does not exist
      */
     MVStore(Map<String, Object> config) {
+        log.info("creating MVStore");
+
         compressionLevel = DataUtils.getConfigParam(config, "compress", 0);
         String fileName = (String) config.get("fileName");
         FileStore<?> fileStore = (FileStore<?>) config.get("fileStore");
@@ -428,6 +433,9 @@ public final class MVStore implements AutoCloseable {
             assert builder.getKeyType() == null || map.getKeyType().getClass().equals(builder.getKeyType().getClass());
             assert builder.getValueType() == null
                     || map.getValueType().getClass().equals(builder.getValueType().getClass());
+
+            log.info("open meta MVMap: id = " + id + ", name = " + name);
+
             return map;
         } else {
             HashMap<String, Object> c = new HashMap<>();
@@ -452,6 +460,9 @@ public final class MVStore implements AutoCloseable {
             if (existingMap != null) {
                 map = existingMap;
             }
+
+            log.info("open MVMap: id = " + id + ", name = " + name);
+
             return map;
         }
     }
@@ -482,6 +493,7 @@ public final class MVStore implements AutoCloseable {
             }
             // looks like map has been concurrently created already, re-start
         }
+        log.info("open MVMap: id = " + id);
         return map;
     }
 
