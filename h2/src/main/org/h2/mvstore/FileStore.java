@@ -262,7 +262,7 @@ public abstract class FileStore<C extends Chunk<C>>
     public final void bind(MVStore mvStore) {
         if(this.mvStore != mvStore) {
             long pos = layout == null ? 0L : layout.getRootPage().getPos();
-            layout = new MVMap<>(mvStore, 0, StringDataType.INSTANCE, StringDataType.INSTANCE);
+            layout = new MVMap<>(mvStore, 0, StringDataType.INSTANCE, StringDataType.INSTANCE, null);
             layout.setRootPos(pos, mvStore.getCurrentVersion());
             this.mvStore = mvStore;
             mvStore.resetLastMapId(lastChunk == null ? 0 : lastChunk.mapId);

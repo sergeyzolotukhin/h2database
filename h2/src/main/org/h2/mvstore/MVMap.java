@@ -48,6 +48,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
     private final AtomicReference<RootReference<K,V>> root;
 
     private final int id;
+    private String description;
     private final long createVersion;
     private final DataType<K> keyType;
     private final DataType<V> valueType;
@@ -75,7 +76,8 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
                 DataUtils.readHexLong(config, "createVersion", 0),
                 new AtomicReference<>(),
                 ((MVStore) config.get("store")).getKeysPerPage(),
-                config.containsKey("singleWriter") && (Boolean) config.get("singleWriter")
+                config.containsKey("singleWriter") && (Boolean) config.get("singleWriter"),
+                (String) config.get("description")
         );
         setInitialRoot(createEmptyLeaf(), store.getCurrentVersion());
     }
@@ -84,17 +86,18 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
     @SuppressWarnings("CopyConstructorMissesField")
     protected MVMap(MVMap<K, V> source) {
         this(source.store, source.keyType, source.valueType, source.id, source.createVersion,
-                new AtomicReference<>(source.root.get()), source.keysPerPage, source.singleWriter);
+                new AtomicReference<>(source.root.get()), source.keysPerPage, source.singleWriter, null);
     }
 
     // meta map constructor
-    MVMap(MVStore store, int id, DataType<K> keyType, DataType<V> valueType) {
-        this(store, keyType, valueType, id, 0, new AtomicReference<>(), store.getKeysPerPage(), false);
+    MVMap(MVStore store, int id, DataType<K> keyType, DataType<V> valueType, String description) {
+        this(store, keyType, valueType, id, 0, new AtomicReference<>(), store.getKeysPerPage(), false, description);
         setInitialRoot(createEmptyLeaf(), store.getCurrentVersion());
+
     }
 
     private MVMap(MVStore store, DataType<K> keyType, DataType<V> valueType, int id, long createVersion,
-            AtomicReference<RootReference<K,V>> root, int keysPerPage, boolean singleWriter) {
+            AtomicReference<RootReference<K,V>> root, int keysPerPage, boolean singleWriter, String description) {
         this.store = store;
         this.id = id;
         this.createVersion = createVersion;
@@ -107,8 +110,9 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
         this.singleWriter = singleWriter;
         this.avgKeySize = keyType.isMemoryEstimationAllowed() ? new AtomicLong() : null;
         this.avgValSize = valueType.isMemoryEstimationAllowed() ? new AtomicLong() : null;
+        this.description = description;
 
-        log.info("Create MMap: id={}", this.id);
+        log.info("Create MMap: id={}, description={}", this.id, this.description);
     }
 
     /**
@@ -1829,6 +1833,11 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
                     }
                     case PUT: {
                         value = decisionMaker.selectValue(result, value);
+                        if (id == 9 || id == 10) {
+                            log.info("put: id={}, description={}, key={}, value={}, obj={}",
+                                    id, description, key, value, toStr(this));
+                        }
+
                         p = p.copy();
                         if (index < 0) {
                             p.insertLeaf(-index - 1, key, value);
@@ -1882,6 +1891,10 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
                 }
             }
         }
+    }
+
+    public static String toStr(Object o) {
+        return o.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(o));
     }
 
     private RootReference<K,V> lockRoot(RootReference<K,V> rootReference, int attempt) {

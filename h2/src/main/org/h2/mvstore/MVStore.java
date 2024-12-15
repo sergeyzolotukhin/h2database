@@ -317,7 +317,7 @@ public final class MVStore implements AutoCloseable {
 
     public MVMap<String,String> openMetaMap() {
         int metaId = fileStore != null ? fileStore.getMetaMapId(this::getNextMapId) : 1;
-        MVMap<String,String> map = new MVMap<>(this, metaId, StringDataType.INSTANCE, StringDataType.INSTANCE);
+        MVMap<String,String> map = new MVMap<>(this, metaId, StringDataType.INSTANCE, StringDataType.INSTANCE, "meta");
         map.setRootPos(getRootPos(map.getId()), currentVersion);
         return map;
     }
@@ -444,6 +444,7 @@ public final class MVStore implements AutoCloseable {
             c.put("id", id);
             long curVersion = currentVersion;
             c.put("createVersion", curVersion);
+            c.put("description", name);
             M map = builder.create(this, c);
             String x = Integer.toHexString(id);
             meta.put(MVMap.getMapKey(id), map.asString(name));
@@ -461,7 +462,7 @@ public final class MVStore implements AutoCloseable {
                 map = existingMap;
             }
 
-            log.info("open MVMap: id = " + id + ", name = " + name);
+//            log.info("open MVMap: id = " + id + ", name = " + name);
 
             return map;
         }
