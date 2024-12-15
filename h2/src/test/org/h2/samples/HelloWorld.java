@@ -32,19 +32,25 @@ public class HelloWorld {
 
         Class.forName("org.h2.Driver");
 //        Connection conn = DriverManager.getConnection("jdbc:h2:~/test");
-        Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
-        log.info("=== Connected to database ===\n");
+        Connection conn = DriverManager.getConnection("jdbc:h2:mem:;AUTOCOMMIT=OFF");
+//        log.info("=== Connected to database ===\n");
         Statement stat = conn.createStatement();
 
         // this line would initialize the database
         // from the SQL script file 'init.sql'
         // stat.execute("runscript from 'init.sql'");
 
+        log.info("=== create table===\n");
+
         stat.execute("create table test(id int primary key, name varchar(255))");
 //        stat.execute("create table test_2(id int primary key, name varchar(255))");
+
+        log.info("=== Insert ===\n");
         stat.execute("insert into test values(1, 'Hello')");
         stat.execute("insert into test values(2, 'Hello')");
-//        conn.commit();
+
+        log.info("=== Commit ===\n");
+        conn.commit();
 //        stat.execute("create table test_3(id int primary key, name varchar(255))");
 //        stat.execute("insert into test values(2, 'Hello')");
 //        conn.commit();
