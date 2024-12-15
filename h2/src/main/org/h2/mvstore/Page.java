@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import org.h2.compress.Compressor;
 import org.h2.mvstore.FileStore.PageSerializationManager;
 import org.h2.util.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A page (a node or a leaf).
@@ -35,6 +37,7 @@ import org.h2.util.Utils;
  * values of the leaf node (one for each key)
  */
 public abstract class Page<K,V> implements Cloneable {
+    final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * Map this page belongs to
@@ -1124,18 +1127,21 @@ public abstract class Page<K,V> implements Cloneable {
 
         NonLeaf(MVMap<K,V> map) {
             super(map);
+//            log.info("create page");
         }
 
         NonLeaf(MVMap<K,V> map, NonLeaf<K,V> source, PageReference<K,V>[] children, long totalCount) {
             super(map, source);
             this.children = children;
             this.totalCount = totalCount;
+//            log.info("create page");
         }
 
         NonLeaf(MVMap<K,V> map, K[] keys, PageReference<K,V>[] children, long totalCount) {
             super(map, keys);
             this.children = children;
             this.totalCount = totalCount;
+//            log.info("create page");
         }
 
         @Override
@@ -1423,6 +1429,7 @@ public abstract class Page<K,V> implements Cloneable {
 
         IncompleteNonLeaf(MVMap<K,V> map, NonLeaf<K,V> source) {
             super(map, source, constructEmptyPageRefs(source.getRawChildPageCount()), source.getTotalCount());
+//            log.info("create page");
         }
 
         private static <K,V> PageReference<K,V>[] constructEmptyPageRefs(int size) {
@@ -1470,16 +1477,19 @@ public abstract class Page<K,V> implements Cloneable {
 
         Leaf(MVMap<K,V> map) {
             super(map);
+//            log.info("create page");
         }
 
         private Leaf(MVMap<K,V> map, Leaf<K,V> source) {
             super(map, source);
             this.values = source.values;
+//            log.info("create page");
         }
 
         Leaf(MVMap<K,V> map, K[] keys, V[] values) {
             super(map, keys);
             this.values = values;
+//            log.info("create page");
         }
 
         @Override
