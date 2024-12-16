@@ -13,7 +13,10 @@ public class MVStoreTest {
 
         MVMap<Integer, String> map = s.openMap("data");
         map.put(1, "Hello World");
+        s.commit();
+
         log.info("{}", map.get(1));
+
 
         s.close();
     }
