@@ -677,7 +677,125 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
     }
 
     // ================================================================================================================
-    //
+    // currsor
+    // ================================================================================================================
+
+    /**
+     * Get a cursor to iterate over a number of keys and values in the latest version of this map.
+     *
+     * @param from the first key to return
+     * @return the cursor
+     */
+    public final Cursor<K, V> cursor(K from) {
+        return cursor(from, null, false);
+    }
+
+    /**
+     * Get a cursor to iterate over a number of keys and values in the latest version of this map.
+     *
+     * @param from the first key to return
+     * @param to the last key to return
+     * @param reverse if true, iterate in reverse (descending) order
+     * @return the cursor
+     */
+    public final Cursor<K, V> cursor(K from, K to, boolean reverse) {
+        return cursor(flushAndGetRoot(), from, to, reverse);
+    }
+
+    /**
+     * Get a cursor to iterate over a number of keys and values.
+     *
+     * @param rootReference of this map's version to iterate over
+     * @param from the first key to return
+     * @param to the last key to return
+     * @param reverse if true, iterate in reverse (descending) order
+     * @return the cursor
+     */
+    public Cursor<K, V> cursor(RootReference<K,V> rootReference, K from, K to, boolean reverse) {
+        return new Cursor<>(rootReference, from, to, reverse);
+    }
+
+    @Override
+    public final Set<Map.Entry<K, V>> entrySet() {
+        final RootReference<K,V> rootReference = flushAndGetRoot();
+        return new AbstractSet<>() {
+
+            @Override
+            public Iterator<Entry<K, V>> iterator() {
+                final Cursor<K, V> cursor = cursor(rootReference, null, null, false);
+                return new Iterator<>() {
+
+                    @Override
+                    public boolean hasNext() {
+                        return cursor.hasNext();
+                    }
+
+                    @Override
+                    public Entry<K, V> next() {
+                        K k = cursor.next();
+                        return new SimpleImmutableEntry<>(k, cursor.getValue());
+                    }
+                };
+
+            }
+
+            @Override
+            public int size() {
+                return MVMap.this.size();
+            }
+
+            @Override
+            public boolean contains(Object o) {
+                return MVMap.this.containsKey(o);
+            }
+
+        };
+
+    }
+
+    @Override
+    public Set<K> keySet() {
+        final RootReference<K,V> rootReference = flushAndGetRoot();
+        return new AbstractSet<>() {
+
+            @Override
+            public Iterator<K> iterator() {
+                return cursor(rootReference, null, null, false);
+            }
+
+            @Override
+            public int size() {
+                return MVMap.this.size();
+            }
+
+            @Override
+            public boolean contains(Object o) {
+                return MVMap.this.containsKey(o);
+            }
+
+        };
+    }
+
+    /**
+     * Iterate over a number of keys.
+     *
+     * @param from the first key to return
+     * @return the iterator
+     */
+    public final Iterator<K> keyIterator(K from) {
+        return cursor(from, null, false);
+    }
+
+    /**
+     * Iterate over a number of keys in reverse order
+     *
+     * @param from the first key to return
+     * @return the iterator
+     */
+    public final Iterator<K> keyIteratorReverse(K from) {
+        return cursor(from, null, true);
+    }
+
     // ================================================================================================================
 
     /**
@@ -835,25 +953,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
         return root;
     }
 
-    /**
-     * Iterate over a number of keys.
-     *
-     * @param from the first key to return
-     * @return the iterator
-     */
-    public final Iterator<K> keyIterator(K from) {
-        return cursor(from, null, false);
-    }
 
-    /**
-     * Iterate over a number of keys in reverse order
-     *
-     * @param from the first key to return
-     * @return the iterator
-     */
-    public final Iterator<K> keyIteratorReverse(K from) {
-        return cursor(from, null, true);
-    }
 
     final boolean rewritePage(long pagePos) {
         Page<K, V> p = readPage(pagePos);
@@ -872,101 +972,6 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
         return false;
     }
 
-    /**
-     * Get a cursor to iterate over a number of keys and values in the latest version of this map.
-     *
-     * @param from the first key to return
-     * @return the cursor
-     */
-    public final Cursor<K, V> cursor(K from) {
-        return cursor(from, null, false);
-    }
-
-    /**
-     * Get a cursor to iterate over a number of keys and values in the latest version of this map.
-     *
-     * @param from the first key to return
-     * @param to the last key to return
-     * @param reverse if true, iterate in reverse (descending) order
-     * @return the cursor
-     */
-    public final Cursor<K, V> cursor(K from, K to, boolean reverse) {
-        return cursor(flushAndGetRoot(), from, to, reverse);
-    }
-
-    /**
-     * Get a cursor to iterate over a number of keys and values.
-     *
-     * @param rootReference of this map's version to iterate over
-     * @param from the first key to return
-     * @param to the last key to return
-     * @param reverse if true, iterate in reverse (descending) order
-     * @return the cursor
-     */
-    public Cursor<K, V> cursor(RootReference<K,V> rootReference, K from, K to, boolean reverse) {
-        return new Cursor<>(rootReference, from, to, reverse);
-    }
-
-    @Override
-    public final Set<Map.Entry<K, V>> entrySet() {
-        final RootReference<K,V> rootReference = flushAndGetRoot();
-        return new AbstractSet<>() {
-
-            @Override
-            public Iterator<Entry<K, V>> iterator() {
-                final Cursor<K, V> cursor = cursor(rootReference, null, null, false);
-                return new Iterator<>() {
-
-                    @Override
-                    public boolean hasNext() {
-                        return cursor.hasNext();
-                    }
-
-                    @Override
-                    public Entry<K, V> next() {
-                        K k = cursor.next();
-                        return new SimpleImmutableEntry<>(k, cursor.getValue());
-                    }
-                };
-
-            }
-
-            @Override
-            public int size() {
-                return MVMap.this.size();
-            }
-
-            @Override
-            public boolean contains(Object o) {
-                return MVMap.this.containsKey(o);
-            }
-
-        };
-
-    }
-
-    @Override
-    public Set<K> keySet() {
-        final RootReference<K,V> rootReference = flushAndGetRoot();
-        return new AbstractSet<>() {
-
-            @Override
-            public Iterator<K> iterator() {
-                return cursor(rootReference, null, null, false);
-            }
-
-            @Override
-            public int size() {
-                return MVMap.this.size();
-            }
-
-            @Override
-            public boolean contains(Object o) {
-                return MVMap.this.containsKey(o);
-            }
-
-        };
-    }
 
     /**
      * Get the map name.
