@@ -13,6 +13,7 @@ import java.util.Map;
 import org.h2.mvstore.CursorPos;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.Page;
+import org.h2.mvstore.page.PageReference;
 import org.h2.mvstore.RootReference;
 import org.h2.mvstore.type.DataType;
 
@@ -144,10 +145,10 @@ public final class MVRTreeMap<V> extends MVMap<Spatial, V> {
                 Spatial[] keys = p.createKeyStorage(2);
                 keys[0] = k1;
                 keys[1] = k2;
-                Page.PageReference<Spatial,V>[] children = Page.createRefStorage(3);
-                children[0] = new Page.PageReference<>(p);
-                children[1] = new Page.PageReference<>(split);
-                children[2] = Page.PageReference.empty();
+                PageReference<Spatial,V>[] children = Page.createRefStorage(3);
+                children[0] = new PageReference<>(p);
+                children[1] = new PageReference<>(split);
+                children[2] = PageReference.empty();
                 p = Page.createNode(this, keys, children, totalCount, 0);
                 registerUnsavedMemory(p.getMemory());
             }
@@ -442,7 +443,7 @@ public final class MVRTreeMap<V> extends MVMap<Spatial, V> {
     }
 
     @Override
-    protected int getChildPageCount(Page<Spatial,V> p) {
+    public int getChildPageCount(Page<Spatial,V> p) {
         return p.getRawChildPageCount() - 1;
     }
 

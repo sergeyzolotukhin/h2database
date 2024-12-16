@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.h2.mvstore.page.PageReference;
 import org.h2.mvstore.type.DataType;
 import org.h2.mvstore.type.ObjectDataType;
 import org.h2.util.MemoryEstimator;
@@ -626,7 +627,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
         return valueType;
     }
 
-    boolean isSingleWriter() {
+    public boolean isSingleWriter() {
         return singleWriter;
     }
 
@@ -636,7 +637,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
      * @param pos the position of the page
      * @return the page
      */
-    final Page<K,V> readPage(long pos) {
+    public final Page<K,V> readPage(long pos) {
         return store.readPage(this, pos);
     }
 
@@ -1096,7 +1097,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
      * @param p the page
      * @return the number of direct children
      */
-    protected int getChildPageCount(Page<K,V> p) {
+    public int getChildPageCount(Page<K,V> p) {
         return p.getRawChildPageCount();
     }
 
@@ -1307,9 +1308,9 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
                             } else {
                                 K[] keys = p.createKeyStorage(1);
                                 keys[0] = key;
-                                Page.PageReference<K,V>[] children = Page.createRefStorage(2);
-                                children[0] = new Page.PageReference<>(p);
-                                children[1] = new Page.PageReference<>(page);
+                                PageReference<K,V>[] children = Page.createRefStorage(2);
+                                children[0] = new PageReference<>(p);
+                                children[1] = new PageReference<>(page);
                                 unsavedMemoryHolder.value += p.getMemory();
                                 p = Page.createNode(this, keys, children, p.getTotalCount() + page.getTotalCount(), 0);
                             }
@@ -1854,9 +1855,9 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
                                 if (pos == null) {
                                     K[] keys = p.createKeyStorage(1);
                                     keys[0] = k;
-                                    Page.PageReference<K,V>[] children = Page.createRefStorage(2);
-                                    children[0] = new Page.PageReference<>(p);
-                                    children[1] = new Page.PageReference<>(split);
+                                    PageReference<K,V>[] children = Page.createRefStorage(2);
+                                    children[0] = new PageReference<>(p);
+                                    children[1] = new PageReference<>(split);
                                     p = Page.createNode(this, keys, children, totalCount, 0);
                                     break;
                                 }
@@ -2005,7 +2006,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
         }
     }
 
-    final boolean isMemoryEstimationAllowed() {
+    public boolean isMemoryEstimationAllowed() {
         return avgKeySize != null || avgValSize != null;
     }
 
@@ -2016,7 +2017,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
         return MemoryEstimator.estimateMemory(avgKeySize, keyType, storage, count);
     }
 
-    final int evaluateMemoryForValues(V[] storage, int count) {
+    public int evaluateMemoryForValues(V[] storage, int count) {
         if (avgValSize == null) {
             return calculateMemory(valueType, storage, count);
         }
@@ -2038,7 +2039,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
         return MemoryEstimator.estimateMemory(avgKeySize, keyType, key);
     }
 
-    final int evaluateMemoryForValue(V value) {
+    public int evaluateMemoryForValue(V value) {
         if (avgValSize == null) {
             return valueType.getMemory(value);
         }

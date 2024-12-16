@@ -1041,7 +1041,7 @@ public final class MVStore implements AutoCloseable {
      * @param pinned whether page is considered pinned
      * @param pageNo sequential page number within chunk
      */
-    void accountForRemovedPage(long pos, long version, boolean pinned, int pageNo) {
+    public void accountForRemovedPage(long pos, long version, boolean pinned, int pageNo) {
         fileStore.accountForRemovedPage(pos, version, pinned, pageNo);
     }
 

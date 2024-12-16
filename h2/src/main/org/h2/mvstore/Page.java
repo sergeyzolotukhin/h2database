@@ -10,10 +10,12 @@ import static org.h2.engine.Constants.MEMORY_OBJECT;
 import static org.h2.engine.Constants.MEMORY_POINTER;
 import static org.h2.mvstore.DataUtils.PAGE_TYPE_LEAF;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import org.h2.compress.Compressor;
 import org.h2.mvstore.FileStore.PageSerializationManager;
+import org.h2.mvstore.page.Leaf;
+import org.h2.mvstore.page.NonLeaf;
+import org.h2.mvstore.page.PageReference;
 import org.h2.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +97,7 @@ public abstract class Page<K,V> implements Cloneable {
     /**
      * The estimated number of bytes used per child entry.
      */
-    static final int PAGE_MEMORY_CHILD = MEMORY_POINTER + 16; //  16 = two longs
+    public static final int PAGE_MEMORY_CHILD = MEMORY_POINTER + 16; //  16 = two longs
 
     /**
      * The estimated number of bytes used per base page.
@@ -108,7 +110,7 @@ public abstract class Page<K,V> implements Cloneable {
     /**
      * The estimated number of bytes used per empty internal page object.
      */
-    static final int PAGE_NODE_MEMORY =
+    public static final int PAGE_NODE_MEMORY =
             PAGE_MEMORY +             // super
             MEMORY_POINTER +          // children
             MEMORY_ARRAY +            // Object[] children
@@ -117,7 +119,7 @@ public abstract class Page<K,V> implements Cloneable {
     /**
      * The estimated number of bytes used per empty leaf page.
      */
-    static final int PAGE_LEAF_MEMORY =
+    public static final int PAGE_LEAF_MEMORY =
             PAGE_MEMORY +             // super
             MEMORY_POINTER +          // values
             MEMORY_ARRAY;             // Object[] values
@@ -131,16 +133,16 @@ public abstract class Page<K,V> implements Cloneable {
     private static final PageReference[] SINGLE_EMPTY = { PageReference.EMPTY };
 
 
-    Page(MVMap<K,V> map) {
+    public Page(MVMap<K,V> map) {
         this.map = map;
     }
 
-    Page(MVMap<K,V> map, Page<K,V> source) {
+    public Page(MVMap<K,V> map, Page<K,V> source) {
         this(map, source.keys);
         memory = source.memory;
     }
 
-    Page(MVMap<K,V> map, K[] keys) {
+    public Page(MVMap<K,V> map, K[] keys) {
         this.map = map;
         this.keys = keys;
     }
@@ -206,7 +208,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param memory the memory used in bytes
      * @return the page
      */
-    static <K,V> Page<K,V> createLeaf(MVMap<K,V> map, K[] keys, V[] values, int memory) {
+    public static <K,V> Page<K,V> createLeaf(MVMap<K,V> map, K[] keys, V[] values, int memory) {
         assert keys != null;
         Page<K,V> page = new Leaf<>(map, keys, values);
         page.initMemoryAccount(memory);
@@ -285,7 +287,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param eraseChildrenRefs whether cloned Page should have no child references or keep originals
      * @return the page
      */
-    abstract Page<K,V> copy(MVMap<K, V> map, boolean eraseChildrenRefs);
+    public abstract Page<K,V> copy(MVMap<K, V> map, boolean eraseChildrenRefs);
 
     /**
      * Get the key at the given index.
@@ -422,7 +424,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param at the split index
      * @return the page with the entries after the split index
      */
-    abstract Page<K,V> split(int at);
+    public abstract Page<K,V> split(int at);
 
     /**
      * Split the current keys array into two arrays.
@@ -431,7 +433,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param bCount size of the second array/
      * @return the second array.
      */
-    final K[] splitKeys(int aCount, int bCount) {
+    public K[] splitKeys(int aCount, int bCount) {
         assert aCount + bCount <= getKeyCount();
         K[] aKeys = createKeyStorage(aCount);
         K[] bKeys = createKeyStorage(bCount);
@@ -449,7 +451,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param extraKeys to be added
      * @param extraValues to be added
      */
-    abstract void expand(int extraKeyCount, K[] extraKeys, V[] extraValues);
+    public abstract void expand(int extraKeyCount, K[] extraKeys, V[] extraValues);
 
     /**
      * Expand the keys array.
@@ -457,7 +459,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param extraKeyCount number of extra key entries to create
      * @param extraKeys extra key values
      */
-    final void expandKeys(int extraKeyCount, K[] extraKeys) {
+    public void expandKeys(int extraKeyCount, K[] extraKeys) {
         int keyCount = getKeyCount();
         K[] newKeys = createKeyStorage(keyCount + extraKeyCount);
         System.arraycopy(keys, 0, newKeys, 0, keyCount);
@@ -478,7 +480,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param index the child index
      * @return the descendant count
      */
-    abstract long getCounts(int index);
+    public abstract long getCounts(int index);
 
     /**
      * Replace the child page.
@@ -542,7 +544,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param index index to insert at
      * @param key the key value
      */
-    final void insertKey(int index, K key) {
+    public void insertKey(int index, K key) {
         int keyCount = getKeyCount();
         assert index <= keyCount : index + " > " + keyCount;
         K[] newKeys = createKeyStorage(keyCount + 1);
@@ -806,12 +808,12 @@ public abstract class Page<K,V> implements Cloneable {
      *                                and can be queried for various attributes
      *                                related to serialization
      */
-    abstract void writeUnsavedRecursive(PageSerializationManager pageSerializationManager);
+    public abstract void writeUnsavedRecursive(PageSerializationManager pageSerializationManager);
 
     /**
      * Unlink the children recursively after all data is written.
      */
-    abstract void releaseSavedPages();
+    public abstract void releaseSavedPages();
 
     public abstract int getRawChildPageCount();
 
@@ -895,7 +897,7 @@ public abstract class Page<K,V> implements Cloneable {
      *
      * @param mem additional memory size.
      */
-    final void addMemory(int mem) {
+    public void addMemory(int mem) {
         memory += mem;
         assert memory >= 0;
     }
@@ -903,7 +905,7 @@ public abstract class Page<K,V> implements Cloneable {
     /**
      * Recalculate estimated memory used in persistent case.
      */
-    final void recalculateMemory() {
+    public void recalculateMemory() {
         assert isPersistent();
         memory = calculateMemory();
     }
@@ -997,7 +999,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param size number of entries
      * @return values array
      */
-    final V[] createValueStorage(int size) {
+    public V[] createValueStorage(int size) {
         return map.getValueType().createStorage(size);
     }
 
@@ -1014,693 +1016,5 @@ public abstract class Page<K,V> implements Cloneable {
         return new PageReference[size];
     }
 
-    /**
-     * A pointer to a page, either in-memory or using a page position.
-     */
-    public static final class PageReference<K,V> {
 
-        /**
-         * Singleton object used when arrays of PageReference have not yet been filled.
-         */
-        @SuppressWarnings("rawtypes")
-        static final PageReference EMPTY = new PageReference<>(null, 0, 0);
-
-        /**
-         * The position, if known, or 0.
-         */
-        private long pos;
-
-        /**
-         * The page, if in memory, or null.
-         */
-        private Page<K,V> page;
-
-        /**
-         * The descendant count for this child page.
-         */
-        final long count;
-
-        /**
-         * Get an empty page reference.
-         *
-         * @param <X> the key class
-         * @param <Y> the value class
-         * @return the page reference
-         */
-        @SuppressWarnings("unchecked")
-        public static <X,Y> PageReference<X,Y> empty() {
-            return EMPTY;
-        }
-
-        public PageReference(Page<K,V> page) {
-            this(page, page.getPos(), page.getTotalCount());
-        }
-
-        PageReference(long pos, long count) {
-            this(null, pos, count);
-            assert DataUtils.isPageSaved(pos);
-        }
-
-        private PageReference(Page<K,V> page, long pos, long count) {
-            this.page = page;
-            this.pos = pos;
-            this.count = count;
-        }
-
-        public Page<K,V> getPage() {
-            return page;
-        }
-
-        /**
-         * Clear if necessary, reference to the actual child Page object,
-         * so it can be garbage collected if not actively used elsewhere.
-         * Reference is cleared only if corresponding page was already saved on a disk.
-         */
-        void clearPageReference() {
-            if (page != null) {
-                page.releaseSavedPages();
-                assert page.isSaved() || !page.isComplete();
-                if (page.isSaved()) {
-                    assert pos == page.getPos();
-                    assert count == page.getTotalCount() : count + " != " + page.getTotalCount();
-                    page = null;
-                }
-            }
-        }
-
-        long getPos() {
-            return pos;
-        }
-
-        /**
-         * Re-acquire position from in-memory page.
-         */
-        void resetPos() {
-            Page<K,V> p = page;
-            if (p != null && p.isSaved()) {
-                pos = p.getPos();
-                assert count == p.getTotalCount();
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "Cnt:" + count + ", pos:" + (pos == 0 ? "0" : DataUtils.getPageChunkId(pos) +
-                    (page == null ? "" : "/" + page.pageNo) +
-                    "-" + DataUtils.getPageOffset(pos) + ":" + DataUtils.getPageMaxLength(pos)) +
-                    ((page == null ? DataUtils.getPageType(pos) == 0 : page.isLeaf()) ? " leaf" : " node") +
-                    ", page:{" + page + "}";
-        }
-    }
-
-
-    private static class NonLeaf<K,V> extends Page<K,V> {
-        /**
-         * The child page references.
-         */
-        private PageReference<K,V>[] children;
-
-        /**
-        * The total entry count of this page and all children.
-        */
-        private long totalCount;
-
-        NonLeaf(MVMap<K,V> map) {
-            super(map);
-//            log.info("create page");
-        }
-
-        NonLeaf(MVMap<K,V> map, NonLeaf<K,V> source, PageReference<K,V>[] children, long totalCount) {
-            super(map, source);
-            this.children = children;
-            this.totalCount = totalCount;
-//            log.info("create page");
-        }
-
-        NonLeaf(MVMap<K,V> map, K[] keys, PageReference<K,V>[] children, long totalCount) {
-            super(map, keys);
-            this.children = children;
-            this.totalCount = totalCount;
-//            log.info("create page");
-        }
-
-        @Override
-        public int getNodeType() {
-            return DataUtils.PAGE_TYPE_NODE;
-        }
-
-        @Override
-        public Page<K,V> copy(MVMap<K, V> map, boolean eraseChildrenRefs) {
-            return eraseChildrenRefs ?
-                    new IncompleteNonLeaf<>(map, this) :
-                    new NonLeaf<>(map, this, children, totalCount);
-        }
-
-        @Override
-        public Page<K,V> getChildPage(int index) {
-            PageReference<K,V> ref = children[index];
-            Page<K,V> page = ref.getPage();
-            if(page == null) {
-                page = map.readPage(ref.getPos());
-                assert ref.getPos() == page.getPos();
-                assert ref.count == page.getTotalCount();
-            }
-            return page;
-        }
-
-        @Override
-        public long getChildPagePos(int index) {
-            return children[index].getPos();
-        }
-
-        @Override
-        public V getValue(int index) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Page<K,V> split(int at) {
-            assert !isSaved();
-            int b = getKeyCount() - at;
-            K[] bKeys = splitKeys(at, b - 1);
-            PageReference<K,V>[] aChildren = createRefStorage(at + 1);
-            PageReference<K,V>[] bChildren = createRefStorage(b);
-            System.arraycopy(children, 0, aChildren, 0, at + 1);
-            System.arraycopy(children, at + 1, bChildren, 0, b);
-            children = aChildren;
-
-            long t = 0;
-            for (PageReference<K,V> x : aChildren) {
-                t += x.count;
-            }
-            totalCount = t;
-            t = 0;
-            for (PageReference<K,V> x : bChildren) {
-                t += x.count;
-            }
-            Page<K,V> newPage = createNode(map, bKeys, bChildren, t, 0);
-            if(isPersistent()) {
-                recalculateMemory();
-            }
-            return newPage;
-        }
-
-        @Override
-        public void expand(int keyCount, Object[] extraKeys, Object[] extraValues) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public long getTotalCount() {
-            assert !isComplete() || totalCount == calculateTotalCount() :
-                        "Total count: " + totalCount + " != " + calculateTotalCount();
-            return totalCount;
-        }
-
-        private long calculateTotalCount() {
-            long check = 0;
-            int keyCount = getKeyCount();
-            for (int i = 0; i <= keyCount; i++) {
-                check += children[i].count;
-            }
-            return check;
-        }
-
-        void recalculateTotalCount() {
-            totalCount = calculateTotalCount();
-        }
-
-        @Override
-        long getCounts(int index) {
-            return children[index].count;
-        }
-
-        @Override
-        public void setChild(int index, Page<K,V> c) {
-            assert c != null;
-            PageReference<K,V> child = children[index];
-            if (c != child.getPage() || c.getPos() != child.getPos()) {
-                totalCount += c.getTotalCount() - child.count;
-                children = children.clone();
-                children[index] = new PageReference<>(c);
-            }
-        }
-
-        @Override
-        public V setValue(int index, V value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void insertLeaf(int index, K key, V value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void insertNode(int index, K key, Page<K,V> childPage) {
-            int childCount = getRawChildPageCount();
-            insertKey(index, key);
-
-            PageReference<K,V>[] newChildren = createRefStorage(childCount + 1);
-            DataUtils.copyWithGap(children, newChildren, childCount, index);
-            children = newChildren;
-            children[index] = new PageReference<>(childPage);
-
-            totalCount += childPage.getTotalCount();
-            if (isPersistent()) {
-                addMemory(MEMORY_POINTER + PAGE_MEMORY_CHILD);
-            }
-        }
-
-        @Override
-        public void remove(int index) {
-            int childCount = getRawChildPageCount();
-            super.remove(index);
-            if(isPersistent()) {
-                if (map.isMemoryEstimationAllowed()) {
-                    addMemory(-getMemory() / childCount);
-                } else {
-                    addMemory(-MEMORY_POINTER - PAGE_MEMORY_CHILD);
-                }
-            }
-            totalCount -= children[index].count;
-            PageReference<K,V>[] newChildren = createRefStorage(childCount - 1);
-            DataUtils.copyExcept(children, newChildren, childCount, index);
-            children = newChildren;
-        }
-
-        @Override
-        public int removeAllRecursive(long version) {
-            int unsavedMemory = removePage(version);
-            if (isPersistent()) {
-                for (int i = 0, size = map.getChildPageCount(this); i < size; i++) {
-                    PageReference<K,V> ref = children[i];
-                    Page<K,V> page = ref.getPage();
-                    if (page != null) {
-                        unsavedMemory += page.removeAllRecursive(version);
-                    } else {
-                        long pagePos = ref.getPos();
-                        assert DataUtils.isPageSaved(pagePos);
-                        if (DataUtils.isLeafPosition(pagePos)) {
-                            map.store.accountForRemovedPage(pagePos, version, map.isSingleWriter(), -1);
-                        } else {
-                            unsavedMemory += map.readPage(pagePos).removeAllRecursive(version);
-                        }
-                    }
-                }
-            }
-            return unsavedMemory;
-        }
-
-        @Override
-        public CursorPos<K,V> getPrependCursorPos(CursorPos<K,V> cursorPos) {
-            Page<K,V> childPage = getChildPage(0);
-            return childPage.getPrependCursorPos(new CursorPos<>(this, 0, cursorPos));
-        }
-
-        @Override
-        public CursorPos<K,V> getAppendCursorPos(CursorPos<K,V> cursorPos) {
-            int keyCount = getKeyCount();
-            Page<K,V> childPage = getChildPage(keyCount);
-            return childPage.getAppendCursorPos(new CursorPos<>(this, keyCount, cursorPos));
-        }
-
-        @Override
-        protected void readPayLoad(ByteBuffer buff) {
-            int keyCount = getKeyCount();
-            children = createRefStorage(keyCount + 1);
-            long[] p = new long[keyCount + 1];
-            for (int i = 0; i <= keyCount; i++) {
-                p[i] = buff.getLong();
-            }
-            long total = 0;
-            for (int i = 0; i <= keyCount; i++) {
-                long s = DataUtils.readVarLong(buff);
-                long position = p[i];
-                assert position == 0 ? s == 0 : s >= 0;
-                total += s;
-                children[i] = position == 0 ?
-                        PageReference.empty() :
-                        new PageReference<>(position, s);
-            }
-            totalCount = total;
-        }
-
-        @Override
-        protected void writeValues(WriteBuffer buff) {}
-
-        @Override
-        protected void writeChildren(WriteBuffer buff, boolean withCounts) {
-            int keyCount = getKeyCount();
-            for (int i = 0; i <= keyCount; i++) {
-                buff.putLong(children[i].getPos());
-            }
-            if(withCounts) {
-                for (int i = 0; i <= keyCount; i++) {
-                    buff.putVarLong(children[i].count);
-                }
-            }
-        }
-
-        @Override
-        void writeUnsavedRecursive(PageSerializationManager pageSerializationManager) {
-            if (!isSaved()) {
-                int patch = write(pageSerializationManager);
-                writeChildrenRecursive(pageSerializationManager);
-                WriteBuffer buff = pageSerializationManager.getBuffer();
-                int old = buff.position();
-                buff.position(patch);
-                writeChildren(buff, false);
-                buff.position(old);
-            }
-        }
-
-        void writeChildrenRecursive(PageSerializationManager pageSerializationManager) {
-            int len = getRawChildPageCount();
-            for (int i = 0; i < len; i++) {
-                PageReference<K,V> ref = children[i];
-                Page<K,V> p = ref.getPage();
-                if (p != null) {
-                    p.writeUnsavedRecursive(pageSerializationManager);
-                    ref.resetPos();
-                }
-            }
-        }
-
-        @Override
-        void releaseSavedPages() {
-            int len = getRawChildPageCount();
-            for (int i = 0; i < len; i++) {
-                children[i].clearPageReference();
-            }
-        }
-
-        @Override
-        public int getRawChildPageCount() {
-            return getKeyCount() + 1;
-        }
-
-        @Override
-        protected int calculateMemory() {
-            return super.calculateMemory() + PAGE_NODE_MEMORY +
-                        getRawChildPageCount() * (MEMORY_POINTER + PAGE_MEMORY_CHILD);
-        }
-
-        @Override
-        public void dump(StringBuilder buff) {
-            super.dump(buff);
-            int keyCount = getKeyCount();
-            for (int i = 0; i <= keyCount; i++) {
-                if (i > 0) {
-                    buff.append(" ");
-                }
-                buff.append("[").append(Long.toHexString(children[i].getPos())).append("]");
-                if(i < keyCount) {
-                    buff.append(" ").append(getKey(i));
-                }
-            }
-        }
-    }
-
-
-    private static class IncompleteNonLeaf<K,V> extends NonLeaf<K,V> {
-
-        private boolean complete;
-
-        IncompleteNonLeaf(MVMap<K,V> map, NonLeaf<K,V> source) {
-            super(map, source, constructEmptyPageRefs(source.getRawChildPageCount()), source.getTotalCount());
-//            log.info("create page");
-        }
-
-        private static <K,V> PageReference<K,V>[] constructEmptyPageRefs(int size) {
-            // replace child pages with empty pages
-            PageReference<K,V>[] children = createRefStorage(size);
-            Arrays.fill(children, PageReference.empty());
-            return children;
-        }
-
-        @Override
-        void writeUnsavedRecursive(PageSerializationManager pageSerializationManager) {
-            if (complete) {
-                super.writeUnsavedRecursive(pageSerializationManager);
-            } else if (!isSaved()) {
-                writeChildrenRecursive(pageSerializationManager);
-            }
-        }
-
-        @Override
-        public boolean isComplete() {
-            return complete;
-        }
-
-        @Override
-        public void setComplete() {
-            recalculateTotalCount();
-            complete = true;
-        }
-
-        @Override
-        public void dump(StringBuilder buff) {
-            super.dump(buff);
-            buff.append(", complete:").append(complete);
-        }
-
-    }
-
-
-
-    private static class Leaf<K,V> extends Page<K,V> {
-        /**
-         * The storage for values.
-         */
-        private V[] values;
-
-        Leaf(MVMap<K,V> map) {
-            super(map);
-//            log.info("create page");
-        }
-
-        private Leaf(MVMap<K,V> map, Leaf<K,V> source) {
-            super(map, source);
-            this.values = source.values;
-//            log.info("create page");
-        }
-
-        Leaf(MVMap<K,V> map, K[] keys, V[] values) {
-            super(map, keys);
-            this.values = values;
-//            log.info("create page");
-        }
-
-        @Override
-        public int getNodeType() {
-            return PAGE_TYPE_LEAF;
-        }
-
-        @Override
-        public Page<K,V> copy(MVMap<K, V> map, boolean eraseChildrenRefs) {
-            return new Leaf<>(map, this);
-        }
-
-        @Override
-        public Page<K,V> getChildPage(int index) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public long getChildPagePos(int index) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public V getValue(int index) {
-            return values == null ? null : values[index];
-        }
-
-        @Override
-        public Page<K,V> split(int at) {
-            assert !isSaved();
-            int b = getKeyCount() - at;
-            K[] bKeys = splitKeys(at, b);
-            V[] bValues = createValueStorage(b);
-            if(values != null) {
-                V[] aValues = createValueStorage(at);
-                System.arraycopy(values, 0, aValues, 0, at);
-                System.arraycopy(values, at, bValues, 0, b);
-                values = aValues;
-            }
-            Page<K,V> newPage = createLeaf(map, bKeys, bValues, 0);
-            if(isPersistent()) {
-                recalculateMemory();
-            }
-            return newPage;
-        }
-
-        @Override
-        public void expand(int extraKeyCount, K[] extraKeys, V[] extraValues) {
-            int keyCount = getKeyCount();
-            expandKeys(extraKeyCount, extraKeys);
-            if(values != null) {
-                V[] newValues = createValueStorage(keyCount + extraKeyCount);
-                System.arraycopy(values, 0, newValues, 0, keyCount);
-                System.arraycopy(extraValues, 0, newValues, keyCount, extraKeyCount);
-                values = newValues;
-            }
-            if(isPersistent()) {
-                recalculateMemory();
-            }
-        }
-
-        @Override
-        public long getTotalCount() {
-            return getKeyCount();
-        }
-
-        @Override
-        long getCounts(int index) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setChild(int index, Page<K,V> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public V setValue(int index, V value) {
-            values = values.clone();
-            V old = setValueInternal(index, value);
-            if(isPersistent()) {
-                if (!map.isMemoryEstimationAllowed()) {
-                    addMemory(map.evaluateMemoryForValue(value) -
-                            map.evaluateMemoryForValue(old));
-                }
-            }
-            return old;
-        }
-
-        private V setValueInternal(int index, V value) {
-            V old = values[index];
-            values[index] = value;
-            return old;
-        }
-
-        @Override
-        public void insertLeaf(int index, K key, V value) {
-            int keyCount = getKeyCount();
-            insertKey(index, key);
-
-            if(values != null) {
-                V[] newValues = createValueStorage(keyCount + 1);
-                DataUtils.copyWithGap(values, newValues, keyCount, index);
-                values = newValues;
-                setValueInternal(index, value);
-                if (isPersistent()) {
-                    addMemory(MEMORY_POINTER + map.evaluateMemoryForValue(value));
-                }
-            }
-        }
-
-        @Override
-        public void insertNode(int index, K key, Page<K,V> childPage) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void remove(int index) {
-            int keyCount = getKeyCount();
-            super.remove(index);
-            if (values != null) {
-                if(isPersistent()) {
-                    if (map.isMemoryEstimationAllowed()) {
-                        addMemory(-getMemory() / keyCount);
-                    } else {
-                        V old = getValue(index);
-                        addMemory(-MEMORY_POINTER - map.evaluateMemoryForValue(old));
-                    }
-                }
-                V[] newValues = createValueStorage(keyCount - 1);
-                DataUtils.copyExcept(values, newValues, keyCount, index);
-                values = newValues;
-            }
-        }
-
-        @Override
-        public int removeAllRecursive(long version) {
-            return removePage(version);
-        }
-
-        @Override
-        public CursorPos<K,V> getPrependCursorPos(CursorPos<K,V> cursorPos) {
-            return new CursorPos<>(this, -1, cursorPos);
-        }
-
-        @Override
-        public CursorPos<K,V> getAppendCursorPos(CursorPos<K,V> cursorPos) {
-            int keyCount = getKeyCount();
-            return new CursorPos<>(this, ~keyCount, cursorPos);
-        }
-
-        @Override
-        protected void readPayLoad(ByteBuffer buff) {
-            int keyCount = getKeyCount();
-            values = createValueStorage(keyCount);
-            map.getValueType().read(buff, values, getKeyCount());
-        }
-
-        @Override
-        protected void writeValues(WriteBuffer buff) {
-            map.getValueType().write(buff, values, getKeyCount());
-        }
-
-        @Override
-        protected void writeChildren(WriteBuffer buff, boolean withCounts) {}
-
-        @Override
-        void writeUnsavedRecursive(PageSerializationManager pageSerializationManager) {
-            if (!isSaved()) {
-                write(pageSerializationManager);
-            }
-        }
-
-        @Override
-        void releaseSavedPages() {}
-
-        @Override
-        public int getRawChildPageCount() {
-            return 0;
-        }
-
-        @Override
-        protected int calculateMemory() {
-//*
-            return super.calculateMemory() + PAGE_LEAF_MEMORY +
-                    (values == null ? 0 : map.evaluateMemoryForValues(values, getKeyCount()));
-/*/
-            int keyCount = getKeyCount();
-            int mem = super.calculateMemory() + PAGE_LEAF_MEMORY + keyCount * MEMORY_POINTER;
-            DataType<V> valueType = map.getValueType();
-            for (int i = 0; i < keyCount; i++) {
-                mem += getMemory(valueType, values[i]);
-            }
-            return mem;
-//*/
-        }
-
-        @Override
-        public void dump(StringBuilder buff) {
-            super.dump(buff);
-            int keyCount = getKeyCount();
-            for (int i = 0; i < keyCount; i++) {
-                if (i > 0) {
-                    buff.append(" ");
-                }
-                buff.append(getKey(i));
-                if (values != null) {
-                    buff.append(':');
-                    buff.append(getValue(i));
-                }
-            }
-        }
-    }
 }
