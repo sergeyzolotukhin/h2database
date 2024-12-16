@@ -3,7 +3,7 @@
  * and the EPL 1.0 (https://h2database.com/html/license.html).
  * Initial Developer: H2 Group
  */
-package org.h2.mvstore;
+package org.h2.mvstore.page;
 
 import static org.h2.engine.Constants.MEMORY_ARRAY;
 import static org.h2.engine.Constants.MEMORY_OBJECT;
@@ -12,10 +12,13 @@ import static org.h2.mvstore.DataUtils.PAGE_TYPE_LEAF;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import org.h2.compress.Compressor;
+import org.h2.mvstore.CursorPos;
+import org.h2.mvstore.DataUtils;
+import org.h2.mvstore.FileStore;
 import org.h2.mvstore.FileStore.PageSerializationManager;
-import org.h2.mvstore.page.Leaf;
-import org.h2.mvstore.page.NonLeaf;
-import org.h2.mvstore.page.PageReference;
+import org.h2.mvstore.MVMap;
+import org.h2.mvstore.MVStore;
+import org.h2.mvstore.WriteBuffer;
 import org.h2.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,7 +159,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param map the map
      * @return the new page
      */
-    static <K,V> Page<K,V> createEmptyLeaf(MVMap<K,V> map) {
+    public static <K,V> Page<K,V> createEmptyLeaf(MVMap<K,V> map) {
         return createLeaf(map, map.getKeyType().createStorage(0),
                 map.getValueType().createStorage(0), PAGE_LEAF_MEMORY);
     }
@@ -171,7 +174,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @return the new page
      */
     @SuppressWarnings("unchecked")
-    static <K,V> Page<K,V> createEmptyNode(MVMap<K,V> map) {
+    public static <K,V> Page<K,V> createEmptyNode(MVMap<K,V> map) {
         return createNode(map, map.getKeyType().createStorage(0), SINGLE_EMPTY, 0,
                             PAGE_NODE_MEMORY + MEMORY_POINTER + PAGE_MEMORY_CHILD); // there is always one child
     }
@@ -237,7 +240,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param p the root page
      * @return the value, or null if not found
      */
-    static <K,V> V get(Page<K,V> p, K key) {
+    public static <K,V> V get(Page<K,V> p, K key) {
         while (true) {
             int index = p.binarySearch(key);
             if (p.isLeaf()) {
@@ -260,7 +263,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param map the map
      * @return the page
      */
-    static <K,V> Page<K,V> read(ByteBuffer buff, long pos, MVMap<K,V> map) {
+    public static <K,V> Page<K,V> read(ByteBuffer buff, long pos, MVMap<K,V> map) {
         boolean leaf = (DataUtils.getPageType(pos) & 1) == PAGE_TYPE_LEAF;
         Page<K,V> p = leaf ? new Leaf<>(map) : new NonLeaf<>(map);
         p.pos = pos;
@@ -412,7 +415,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param key the key
      * @return the value or null
      */
-    int binarySearch(K key) {
+    public int binarySearch(K key) {
         int res = map.getKeyType().binarySearch(key, keys, getKeyCount(), cachedCompare);
         cachedCompare = res < 0 ? ~res : res + 1;
         return res;

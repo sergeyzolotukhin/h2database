@@ -4,7 +4,6 @@ import org.h2.mvstore.CursorPos;
 import org.h2.mvstore.DataUtils;
 import org.h2.mvstore.FileStore;
 import org.h2.mvstore.MVMap;
-import org.h2.mvstore.Page;
 import org.h2.mvstore.WriteBuffer;
 
 import java.nio.ByteBuffer;

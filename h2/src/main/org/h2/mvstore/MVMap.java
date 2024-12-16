@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.h2.mvstore.page.Page;
 import org.h2.mvstore.page.PageReference;
 import org.h2.mvstore.type.DataType;
 import org.h2.mvstore.type.ObjectDataType;
@@ -813,7 +814,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
         return store;
     }
 
-    protected final boolean isPersistent() {
+    public  final boolean isPersistent() {
         return store.isPersistent() && !isVolatile;
     }
 
@@ -2010,7 +2011,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
         return avgKeySize != null || avgValSize != null;
     }
 
-    final int evaluateMemoryForKeys(K[] storage, int count) {
+    public final int evaluateMemoryForKeys(K[] storage, int count) {
         if (avgKeySize == null) {
             return calculateMemory(keyType, storage, count);
         }
@@ -2032,7 +2033,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
         return mem;
     }
 
-    final int evaluateMemoryForKey(K key) {
+    public final int evaluateMemoryForKey(K key) {
         if (avgKeySize == null) {
             return keyType.getMemory(key);
         }

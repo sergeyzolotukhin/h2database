@@ -607,7 +607,7 @@ public final class DataUtils {
      * @return true if page has been removed (no longer accessible from the
      *         current root of the tree)
      */
-    static boolean isPageRemoved(long pos) {
+    public static boolean isPageRemoved(long pos) {
         return pos == 1L;
     }
 

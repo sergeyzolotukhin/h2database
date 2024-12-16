@@ -12,7 +12,7 @@ import java.util.Map;
 
 import org.h2.mvstore.CursorPos;
 import org.h2.mvstore.MVMap;
-import org.h2.mvstore.Page;
+import org.h2.mvstore.page.Page;
 import org.h2.mvstore.page.PageReference;
 import org.h2.mvstore.RootReference;
 import org.h2.mvstore.type.DataType;

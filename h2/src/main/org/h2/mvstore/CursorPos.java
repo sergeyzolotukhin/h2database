@@ -5,6 +5,8 @@
  */
 package org.h2.mvstore;
 
+import org.h2.mvstore.page.Page;
+
 /**
  * A position in a cursor.
  * Instance represents a node in the linked list, which traces path

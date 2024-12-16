@@ -5,6 +5,8 @@
  */
 package org.h2.mvstore;
 
+import org.h2.mvstore.page.Page;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 

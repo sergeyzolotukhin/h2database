@@ -1,7 +1,6 @@
 package org.h2.mvstore.page;
 
 import org.h2.mvstore.DataUtils;
-import org.h2.mvstore.Page;
 
 /**
  * A pointer to a page, either in-memory or using a page position.

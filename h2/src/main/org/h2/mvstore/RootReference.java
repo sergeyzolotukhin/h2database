@@ -5,6 +5,8 @@
  */
 package org.h2.mvstore;
 
+import org.h2.mvstore.page.Page;
+
 /**
  * Class RootReference is an immutable structure to represent state of the MVMap as a whole
  * (not related to a particular B-Tree node).

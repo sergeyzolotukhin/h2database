@@ -8,6 +8,7 @@ package org.h2.mvstore;
 import org.h2.engine.Constants;
 import static org.h2.mvstore.MVStore.INITIAL_VERSION;
 import org.h2.mvstore.cache.CacheLongKeyLIRS;
+import org.h2.mvstore.page.Page;
 import org.h2.mvstore.type.StringDataType;
 import org.h2.util.MathUtils;
 import org.h2.util.Utils;

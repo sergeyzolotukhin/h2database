@@ -23,7 +23,7 @@ import org.h2.index.SpatialIndex;
 import org.h2.message.DbException;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStoreException;
-import org.h2.mvstore.Page;
+import org.h2.mvstore.page.Page;
 import org.h2.mvstore.rtree.MVRTreeMap;
 import org.h2.mvstore.rtree.MVRTreeMap.RTreeCursor;
 import org.h2.mvstore.rtree.Spatial;

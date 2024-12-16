@@ -30,6 +30,7 @@ import java.util.function.Predicate;
 import org.h2.compress.CompressDeflate;
 import org.h2.compress.CompressLZF;
 import org.h2.compress.Compressor;
+import org.h2.mvstore.page.Page;
 import org.h2.mvstore.type.StringDataType;
 import org.h2.store.fs.FileUtils;
 import org.h2.util.Utils;
@@ -1045,21 +1046,21 @@ public final class MVStore implements AutoCloseable {
         fileStore.accountForRemovedPage(pos, version, pinned, pageNo);
     }
 
-    Compressor getCompressorFast() {
+    public Compressor getCompressorFast() {
         if (compressorFast == null) {
             compressorFast = new CompressLZF();
         }
         return compressorFast;
     }
 
-    Compressor getCompressorHigh() {
+    public Compressor getCompressorHigh() {
         if (compressorHigh == null) {
             compressorHigh = new CompressDeflate();
         }
         return compressorHigh;
     }
 
-    int getCompressionLevel() {
+    public int getCompressionLevel() {
         return compressionLevel;
     }
 
