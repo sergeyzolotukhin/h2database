@@ -1765,6 +1765,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
                     locked = true;
                 }
             }
+
             Page<K,V> rootPage = rootReference.root;
             long version = rootReference.version;
             CursorPos<K,V> tip;
@@ -1841,10 +1842,10 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
                         p = p.copy();
                         if (index < 0) {
                             p.insertLeaf(-index - 1, key, value);
+
                             int keyCount;
                             while ((keyCount = p.getKeyCount()) > store.getKeysPerPage()
-                                    || p.getMemory() > store.getMaxPageSize()
-                                    && keyCount > (p.isLeaf() ? 1 : 2)) {
+                                    || p.getMemory() > store.getMaxPageSize() && keyCount > (p.isLeaf() ? 1 : 2)) {
                                 long totalCount = p.getTotalCount();
                                 int at = keyCount >> 1;
                                 K k = p.getKey(at);
@@ -1873,7 +1874,9 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
                         break;
                     }
                 }
+
                 rootPage = replacePage(pos, p, unsavedMemoryHolder);
+
                 if (!locked) {
                     rootReference = rootReference.updateRootPage(rootPage, attempt);
                     if (rootReference == null) {

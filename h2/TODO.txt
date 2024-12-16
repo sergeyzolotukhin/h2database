@@ -1,0 +1,2 @@
+https://knowledgebasement.com/how-to-backup-and-restore-h2-database/
+https://h2-database.narkive.com/fVpgFUwM/h2-how-to-restore-a-h2-database-backup-into-a-new-h2-database
