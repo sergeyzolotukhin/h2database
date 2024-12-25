@@ -1,0 +1,50 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+note "the meta contains name of map to id mapping" as N1
+note "the maps contains id to MVMap mapping" as N2
+
+N1 .. MVStore
+N2 .. MVStore
+class MVStore {
+    MVMap<String, String> meta
+    Map<Integer, MVMap<?, ?>> maps
+    long currentVersion
+}
+
+class MVMap {
+    MVStore store
+
+    int id
+    RootReference<K,V> root
+}
+
+abstract class Page<K,V> {
+    MVMap<K,V> map
+
+    K[] keys
+}
+
+class Leaf<K, V> {
+    V[] values
+}
+
+class NonLeaf<K, V> {
+    PageReference<K, V>[] children
+}
+
+Page <|-- Leaf
+Page <|-- NonLeaf
+
+class RootReference<K, V> {
+    Page<K,V> root
+    final long version
+}
+
+class PageReference<K, V> {
+    Page<K, V> page
+    long pos
+    long count
+}
+
+@enduml

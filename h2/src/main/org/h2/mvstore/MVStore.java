@@ -274,8 +274,8 @@ public final class MVStore implements AutoCloseable {
         }
         this.fileStore = fileStore;
         keysPerPage = DataUtils.getConfigParam(config, "keysPerPage", 48);
-        backgroundExceptionHandler =
-                (UncaughtExceptionHandler)config.get("backgroundExceptionHandler");
+        backgroundExceptionHandler = (UncaughtExceptionHandler)config.get("backgroundExceptionHandler");
+
         if (fileStore != null) {
             // 19 KB memory is about 1 KB storage
             int kb = Math.max(1, Math.min(19, Utils.scaleForAvailableMemory(64))) * 1024;
