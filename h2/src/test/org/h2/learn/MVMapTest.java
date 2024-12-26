@@ -23,6 +23,11 @@ public class MVMapTest {
 
         log.info("page: \n{}", map.getRootPage());
 
+        for (int i = 25; i < 50; i++) {
+            map.put(i, "Hello " + i);
+        }
+
+        log.info("page: \n{}", map.getRootPage());
 
         long oldVersion = s.getCurrentVersion();
         s.commit(); // from now on, the old version is read-only
