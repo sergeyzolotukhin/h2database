@@ -13,8 +13,16 @@ public class MVMapTest {
 
         MVMap<Integer, String> map = s.openMap("data");
 
-        map.put(1, "Hello");
-        map.put(2, "World");
+        for (int i = 0; i < 24; i++) {
+            map.put(i, "Hello " + i);
+        }
+
+        for (int i = 100; i < 125; i++) {
+            map.put(i, "Hello " + i);
+        }
+
+        log.info("page: \n{}", map.getRootPage());
+
 
         long oldVersion = s.getCurrentVersion();
         s.commit(); // from now on, the old version is read-only

@@ -62,6 +62,7 @@ public class Leaf<K, V> extends Page<K, V> {
     @Override
     public Page<K, V> split(int at) {
         assert !isSaved();
+
         int b = getKeyCount() - at;
         K[] bKeys = splitKeys(at, b);
         V[] bValues = createValueStorage(b);

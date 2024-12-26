@@ -368,6 +368,7 @@ public abstract class Page<K,V> implements Cloneable {
      * @param buff append buffer
      */
     protected void dump(StringBuilder buff) {
+        buff.append("type: ").append(getClass().getSimpleName()).append("\n");
         buff.append("id: ").append(System.identityHashCode(this)).append('\n');
         buff.append("pos: ").append(Long.toHexString(pos)).append('\n');
         if (isSaved()) {
@@ -438,6 +439,7 @@ public abstract class Page<K,V> implements Cloneable {
      */
     public K[] splitKeys(int aCount, int bCount) {
         assert aCount + bCount <= getKeyCount();
+
         K[] aKeys = createKeyStorage(aCount);
         K[] bKeys = createKeyStorage(bCount);
         System.arraycopy(keys, 0, aKeys, 0, aCount);

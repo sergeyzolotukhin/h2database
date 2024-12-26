@@ -77,6 +77,7 @@ public class NonLeaf<K, V> extends Page<K, V> {
     @Override
     public Page<K, V> split(int at) {
         assert !isSaved();
+
         int b = getKeyCount() - at;
         K[] bKeys = splitKeys(at, b - 1);
         PageReference<K, V>[] aChildren = createRefStorage(at + 1);
@@ -90,6 +91,7 @@ public class NonLeaf<K, V> extends Page<K, V> {
             t += x.count;
         }
         totalCount = t;
+
         t = 0;
         for (PageReference<K, V> x : bChildren) {
             t += x.count;
@@ -314,7 +316,15 @@ public class NonLeaf<K, V> extends Page<K, V> {
             buff.append("[").append(Long.toHexString(children[i].getPos())).append("]");
             if (i < keyCount) {
                 buff.append(" ").append(getKey(i));
+            } else {
+                buff.append(" ").append("?");
             }
+        }
+
+        buff.append("\n\n");
+        for (int i = 0; i <= keyCount; i++) {
+            children[i].getPage().dump(buff);
+            buff.append("\n\n");
         }
     }
 }

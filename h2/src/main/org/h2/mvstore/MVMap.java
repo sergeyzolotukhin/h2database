@@ -640,6 +640,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
                                     p = Page.createNode(this, keys, children, totalCount, 0);
                                     break;
                                 }
+
                                 Page<K,V> c = p;
                                 p = pos.page;
                                 index = pos.index;
